@@ -1,0 +1,153 @@
+Mini-Project: Toy Dynamic Memory Allocator
+Course: Self-Directed Systems Programming
+Estimated Duration: 3–4 months (~2 hours/week)
+Prerequisites: C programming, basic computer architecture, pointers, structs, linked lists
+Project Overview
+
+Memory allocation is a fundamental part of systems programming. Your task is to implement a simple dynamic memory allocator in C that mimics the behavior of malloc and free. The allocator should manage a fixed-size heap, reuse freed memory, and handle basic fragmentation.
+
+The project is divided into core milestones (required) and optional extensions (for deeper systems experience).
+
+Learning Objectives
+
+By completing this project, you will:
+
+Understand manual memory management and low-level pointer manipulation
+
+Implement and manage metadata for dynamic memory blocks
+
+Handle allocation, deallocation, and reuse of memory
+
+Learn about memory fragmentation and strategies to reduce it
+
+Optionally explore concurrency, alignment, and performance trade-offs
+
+Project Requirements
+Step 0: Setup
+
+Allocate a fixed-size heap (1 MB) using either:
+
+A pre-allocated array (char heap[1024*1024];)
+
+Or OS memory (sbrk()/mmap() on Linux, VirtualAlloc() on Windows)
+
+Track allocations using a linked list of metadata blocks inside the heap
+
+Step 1: Basic malloc
+
+Task:
+
+Implement malloc(size_t size)
+
+Traverse the heap to find a free block large enough for the requested size
+
+Return a pointer to usable memory
+
+Deliverable:
+
+Allocates memory correctly from your heap
+
+Returns NULL if no suitable block is available
+
+Step 2: Basic free
+
+Task:
+
+Implement free(void* ptr)
+
+Mark the block at ptr as free
+
+Ensure that freed memory can be reused in future allocations
+
+Deliverable:
+
+Freed memory is reusable
+
+No memory corruption occurs
+
+Step 3: Splitting and Coalescing
+
+Task:
+
+Splitting: If a free block is larger than requested, split it into an allocated block + leftover free block
+
+Coalescing: Merge adjacent free blocks during free() to reduce fragmentation
+
+Deliverable:
+
+Demonstrates efficient memory reuse
+
+Reduces wasted memory
+
+Step 4: Testing
+
+Task:
+
+Write small programs to test your allocator:
+
+Multiple allocation/free patterns
+
+Different block sizes
+
+Stress tests with repeated allocations
+
+Optional: print heap state for visualization
+
+Deliverable:
+
+Test programs demonstrating correct behavior
+
+Documented test results
+
+Step 5: Optional Extensions
+
+You can expand the project for extra learning or “fun” features:
+
+Thread Safety: Use mutexes to allow multiple threads to call malloc/free safely
+
+Alignment: Ensure returned pointers are 8- or 16-byte aligned
+
+Allocation Strategy Variants: Implement best-fit, worst-fit, or next-fit strategies
+
+Logging / Profiling: Track allocation counts, fragmentation, and memory usage over time
+
+Deliverable:
+
+Any optional feature implemented cleanly with tests
+
+Documented design decisions and trade-offs
+
+Step 6: Documentation
+
+Write a README or mini-report including:
+
+Design decisions (why first-fit, why coalescing, etc.)
+
+Challenges encountered and how they were solved
+
+Test results demonstrating correctness
+
+Optional: performance analysis
+
+Milestone Checklist
+Milestone	Completed?
+Heap setup and metadata	☐
+Basic malloc	☐
+Basic free	☐
+Splitting & coalescing	☐
+Test programs	☐
+Optional extensions	☐
+Documentation	☐
+Grading / Success Criteria (for self-assessment)
+
+Allocator correctly allocates and frees memory ✅
+
+Freed memory is reusable ✅
+
+Minimal fragmentation with splitting/coalescing ✅
+
+Test programs demonstrate correctness ✅
+
+Optional extensions implemented cleanly ✅
+
+Clear README explaining design and trade-offs ✅
