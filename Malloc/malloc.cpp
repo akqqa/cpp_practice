@@ -1,20 +1,17 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
+#include "block.h"
+#include "block_sort.h"
 
 static constexpr std::size_t HEAP_SIZE = 1024 * 1024; // 1 MB
 
 static std::uint8_t heap[HEAP_SIZE];
 
-struct Block {
-    std::size_t size;   // Size of usable memory
-    bool free;          // Is this block free?
-    Block* next;        // Next block in linked list
-};
-
 // Head of the block list
 static Block* free_list = nullptr; // This is a pointer to the first block in the heap
 
+//todo - add sorting for largest first, and other allocation schemes
 
 void init_allocator() {
     // Initialize a single large free block covering the whole heap
