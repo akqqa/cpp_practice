@@ -12,6 +12,7 @@ static std::uint8_t heap[HEAP_SIZE];
 static Block* free_list = nullptr; // This is a pointer to the first block in the heap
 
 //todo - add sorting for largest first, and other allocation schemes
+// wait i just need a linear scan not merge sort oops
 
 void init_allocator() {
     // Initialize a single large free block covering the whole heap
