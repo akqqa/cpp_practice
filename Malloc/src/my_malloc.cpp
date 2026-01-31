@@ -2,10 +2,9 @@
 #include <cstdint>
 #include <cstdio>
 #include "block.h"
-#include "block_sort.h"
+#include "allocator_config.h"
 
-static constexpr std::size_t HEAP_SIZE = 1024 * 1024; // 1 MB
-
+const std::size_t HEAP_SIZE = 1024 * 1024;
 static std::uint8_t heap[HEAP_SIZE];
 
 // Head of the block list
@@ -107,36 +106,17 @@ void dump_heap() {
     printf("\n");
 }
 
-int main() {
-    init_allocator();
+int free_list_size() {
+    // Get the current block pointer
+    Block* current = free_list;
 
-    dump_heap();
+    int count = 0;
 
-    void* a = my_malloc(64);
-    void* b = my_malloc(128);
-
-    if(a == nullptr) {
-        printf("a is null\n");
-    }
-    if(b == nullptr) {
-        printf("b is null\n");
+    // Will loop through all blocks until nullptr
+    while (current) {
+        current = current->next;
+        count++;
     }
 
-    dump_heap();
-
-    my_free(a);
-
-    void* c = my_malloc(999999);
-
-    dump_heap();
-
-    my_free(b);
-
-    dump_heap();
-
-    my_free(c);
-
-    dump_heap();
-
-    return 0;
+    return count;
 }

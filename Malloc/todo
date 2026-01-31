@@ -1,0 +1,9 @@
+1. add tests with Catch2
+2. make thread safe and add tests for such
+3. add user alignment
+
+
+Build and test commands from root:
+cmake -S . -B Build
+cmake --build build
+( cd build ; ctest )
