@@ -1,6 +1,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
+#include <string>
+#include <sstream>
+#include <mutex>
 #include "block.h"
 #include "allocator_config.h"
 
@@ -9,6 +12,8 @@ static std::uint8_t heap[HEAP_SIZE];
 
 // Head of the block list
 static Block* free_list = nullptr; // This is a pointer to the first block in the heap
+
+static std::mutex heap_lock;
 
 //todo - add sorting for largest first, and other allocation schemes
 // wait i just need a linear scan not merge sort oops
@@ -25,6 +30,8 @@ void* my_malloc(std::size_t size) { // Size is size in bytes
     if (size == 0) {
         return nullptr;
     }
+
+    std::lock_guard<std::mutex> lock(heap_lock);
 
     // Get the current block pointer
     Block* current = free_list;
@@ -63,6 +70,8 @@ void my_free(void* ptr) {
     if (!ptr) {
         return;
     }
+
+    std::lock_guard<std::mutex> lock(heap_lock);
 
     Block* block = reinterpret_cast<Block*>(
         reinterpret_cast<std::uint8_t*>(ptr) - sizeof(Block) // Turn the pointer to the start of the memory space into a uint8_t, and go back sizeof(Block) bytes to get the address of the header
@@ -106,6 +115,25 @@ void dump_heap() {
     printf("\n");
 }
 
+std::string dump_heap_string() {
+    std::ostringstream out;
+
+    Block* current = free_list;
+    std::size_t index = 0;
+
+    while (current) {
+        out << "Block " << index++
+            << " | addr=" << current
+            << " | size=" << current->size
+            << " | free=" << current->free
+            << '\n';
+
+        current = current->next;
+    }
+
+    return out.str();
+}
+
 int free_list_size() {
     // Get the current block pointer
     Block* current = free_list;
@@ -119,4 +147,15 @@ int free_list_size() {
     }
 
     return count;
+}
+
+Block* getBlock(int index) {
+    Block* current = free_list;
+    for (int i = 0; i < index; i++) {
+        if (current == nullptr) {
+            return nullptr;
+        }
+        current = current->next;
+    }
+    return current;
 }

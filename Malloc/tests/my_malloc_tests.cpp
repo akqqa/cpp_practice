@@ -1,5 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
+#include <thread>
 #include "my_malloc.h"
 #include "allocator_config.h"
 
@@ -54,9 +55,9 @@ TEST_CASE("allocation marks block correctly") {
 
     void* a = my_malloc(64);
 
-    auto* block = reinterpret_cast<Block*>(
-        static_cast<std::uint8_t*>(a) - sizeof(Block)
-    );
+    CAPTURE(dump_heap_string());
+
+    Block* block = getBlock(0);
 
     REQUIRE(block->free == false);
     REQUIRE(block->size == 64);
@@ -68,11 +69,10 @@ TEST_CASE("allocation leaves empty block correct") {
     init_allocator();
 
     void* a = my_malloc(64);
+    
+    CAPTURE(dump_heap_string());
 
-    auto* block = reinterpret_cast<Block*>(
-        static_cast<std::uint8_t*>(a) - sizeof(Block)
-    );
-    block = block->next;
+    Block* block = getBlock(1);
 
     REQUIRE(block->free == true);
     CAPTURE(block->size);
@@ -81,3 +81,26 @@ TEST_CASE("allocation leaves empty block correct") {
     my_free(a);
 }
 
+void threadFunc() {
+        for (int i = 0; i < 50; ++i) {
+            void* p = my_malloc(50);
+            std::this_thread::yield();
+        }
+}
+
+// Run multiple times to check for race conditions - not perfect but better than nothing
+TEST_CASE("allocation is thread safe") {
+    init_allocator();
+
+    std::thread t1(threadFunc);
+    std::thread t2(threadFunc);
+    std::thread t3(threadFunc);
+
+    t1.join();
+    t2.join();
+    t3.join();
+
+    CAPTURE(dump_heap_string());
+
+    REQUIRE(free_list_size() == 151);
+}
