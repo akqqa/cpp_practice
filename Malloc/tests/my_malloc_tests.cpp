@@ -4,11 +4,6 @@
 #include "my_malloc.h"
 #include "allocator_config.h"
 
-// Basic malloc tests:
-// Allocation returns a pointer
-// When allocated, there is one blcok in the free list that is allocated, with another empty block. size of the blocks is expected
-// splitting and coalescing
-
 TEST_CASE("allocation returns usable pointer") {
     init_allocator();
     void* a = my_malloc(64);
@@ -22,6 +17,19 @@ TEST_CASE("allocation returns usable pointer") {
 
     my_free(a);
 }
+
+TEST_CASE("allocator returns null when no space left in heap") {
+    init_allocator();
+    void* a = my_malloc(HEAP_SIZE - sizeof(Block));
+    
+    REQUIRE(a != nullptr);
+    REQUIRE(free_list_size() == 1);
+
+    void* b = my_malloc(4);
+    REQUIRE(b == nullptr);
+    REQUIRE(free_list_size() == 1);
+
+} 
 
 TEST_CASE("allocator splits blocks") {
     init_allocator();
