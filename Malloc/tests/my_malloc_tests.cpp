@@ -112,3 +112,23 @@ TEST_CASE("allocation is thread safe") {
 
     REQUIRE(free_list_size() == 151);
 }
+
+TEST_CASE("Returned pointers are correctly aligned") {
+    init_allocator();
+
+    void* a = my_malloc(2343);
+    void* b = my_malloc(123);
+    void* c = my_malloc(6767);
+    void* d = my_malloc(3);
+
+    REQUIRE(free_list_size() == 5);
+
+    // Check each one is aligned
+    REQUIRE(reinterpret_cast<std::uintptr_t>(a) % ALIGNMENT_SIZE == 0);
+    REQUIRE(reinterpret_cast<std::uintptr_t>(b) % ALIGNMENT_SIZE == 0);
+    REQUIRE(reinterpret_cast<std::uintptr_t>(c) % ALIGNMENT_SIZE == 0);
+    REQUIRE(reinterpret_cast<std::uintptr_t>(d) % ALIGNMENT_SIZE == 0);
+
+
+
+}

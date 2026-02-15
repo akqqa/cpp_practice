@@ -8,15 +8,14 @@
 #include "allocator_config.h"
 
 const std::size_t HEAP_SIZE = 1024 * 1024;
-static std::uint8_t heap[HEAP_SIZE];
+const std::size_t ALIGNMENT_SIZE = alignof(std::max_align_t);
+
+alignas(std::max_align_t) static std::uint8_t heap[HEAP_SIZE]; // aligns heap on max alignment needed for any object type
 
 // Head of the block list
 static Block* free_list = nullptr; // This is a pointer to the first block in the heap
 
 static std::mutex heap_lock;
-
-//todo - add sorting for largest first, and other allocation schemes
-// wait i just need a linear scan not merge sort oops
 
 void init_allocator() {
     // Initialize a single large free block covering the whole heap
@@ -36,11 +35,12 @@ void* my_malloc(std::size_t size) { // Size is size in bytes
     // Get the current block pointer
     Block* current = free_list;
 
+    size = ((size + ALIGNMENT_SIZE - 1) / ALIGNMENT_SIZE) * ALIGNMENT_SIZE; // Aligns the size
+
     // Will loop through all blocks until one free and right size is found
     while (current) {
         if (current->free && current->size >= size) { // If current block is big enough and free, allocate block
-            // TODO:
-            // User alignment
+
 
             // If enough space, split the block
             if (current->size > size + sizeof(Block) + 1) { 

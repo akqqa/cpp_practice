@@ -6,4 +6,4 @@
 Build and test commands from root:
 cmake -S . -B Build
 cmake --build build
-( cd build ; ctest )
+( cd build ; ctest --output-on-failure)
