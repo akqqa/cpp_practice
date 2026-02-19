@@ -1,0 +1,7 @@
+Create a tree data structure
+Each node is a file or dir
+Each file has name, contents (simple string or raw data), isdirectory flag, and children
+can only have children if directory, and cant have contents if directory
+^ just use two classes inheriting from node. fileNode and dirNode
+
+once basics down implement ls, pwd, touch, mkdir, all the basic commands.
