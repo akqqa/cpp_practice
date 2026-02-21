@@ -7,11 +7,13 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <boost/program_options.hpp>
 using namespace cimg_library;
 using namespace std;
 
+namespace po = boost::program_options;
+
 const float CHAR_ASPECT = 0.4f; // Characters are ~half as wide as they are tall
-const int OUTPUT_WIDTH = 40;
 
 // Algorithm:
 // read characters, create a mapping of 256 range to characters evenly based on how many there are#
@@ -60,10 +62,10 @@ CImg<unsigned char> resizeImage(CImg<unsigned char> image, int outputWidth) {
     return averageResize(image, outputWidth, outputHeight);
 }
 
-map<int, string> mapCharacterDensity(vector<string> characterSet, CImg<unsigned char> image, bool scaleContrast) {
+map<int, string> mapCharacterDensity(vector<string> characterSet, CImg<unsigned char> image, bool scaleContrast = true) {
     // Get brightness range of image
     int maxBrightness = 0;
-    int minBrightness = 256;
+    int minBrightness = 255;
     if (scaleContrast) {
         cimg_forXY(image, x, y) {
             unsigned char value = image(x, y);
@@ -130,27 +132,78 @@ vector<string> renderImage(CImg<unsigned char> image, map<int, string> mapping) 
     return result;
 }
 
-// 1st arg: character set
-// 2nd arg: image
 int main(int argc, char* argv[]) {
-    if (argc != 3) {
-        cout << "Incorrect number of arguments\n";
+    // Program Options
+
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("help,h", "produce help message")
+        ("characters,c", po::value<std::string>()->required(), "character set file")
+        ("input,i", po::value<std::string>()->required(), "input file")
+        ("width,w", po::value<int>()->default_value(60), "width of output in characters")
+        ("invert,v", "invert the image");
+
+    po::positional_options_description p;
+    p.add("characters", 1);
+    p.add("input", 1);
+
+    po::variables_map vm;
+    
+    try {
+        po::store(
+            po::command_line_parser(argc, argv)
+                .options(desc)
+                .positional(p)
+                .run(),
+            vm
+        );
+
+        if (vm.count("help")) {
+            cout << desc << "\n";
+            return 0;
+        }
+
+        po::notify(vm);
+    } catch (const po::error& e) {
+        cout << e.what() << "\n";
+        cout << desc << "\n";
         return 1;
     }
 
-    vector<string> characterSet = getCharacterSet(argv[1]);
+    string inputFile;
+    string characterSetFile;
+    int width;
+    bool invert = false;
+
+    inputFile = vm["input"].as<string>();
+    characterSetFile = vm["characters"].as<string>();
+    width = vm["width"].as<int>();
+    if (width < 10 || width > 500) {
+        cout << "Error: width must be between 10 and 500\n";
+        return 1;
+    }
+    if (vm.count("invert")) {
+        invert = true;
+    }
+
+    vector<string> characterSet = getCharacterSet(characterSetFile);
     // cout << "characters: \n";
     // for (string chars: characterSet) {
     //     cout << chars << "\n";
     // }
 
-    CImg<unsigned char> image(argv[2]);
+    CImg<unsigned char> image(inputFile.c_str());
     if (image.spectrum() != 3) {
         image = image.get_channels(0, 2);
     } else {
         image = image.RGBtoYCbCr().channel(0);
     }
-    CImg<unsigned char> resizedImage = resizeImage(image, OUTPUT_WIDTH);
+    
+    if (invert) {
+        image = 255 - image;
+    }
+
+    CImg<unsigned char> resizedImage = resizeImage(image, width);
 
     map<int, string> mapping = mapCharacterDensity(characterSet, resizedImage, true);
 
@@ -159,7 +212,9 @@ int main(int argc, char* argv[]) {
 
     // Output image!
     vector<string> renderedImage = renderImage(resizedImage, mapping);
+    cout << "\n";
     for (string line: renderedImage) {
         cout << line << "\n";
     }
+    cout << "\n";
 }
