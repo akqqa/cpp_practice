@@ -8,5 +8,4 @@ This project will:
 - Allow custom sets to be input in any order, and programatically assign order by pixel density (bonus)
 
 
-
-g++ image2ASCII.cpp -std=c++17 -O2 -o image2ASCII -ljpeg -lpng -lX11
+g++ image2ASCII.cpp -std=c++17 -O2 -o image2ASCII -ljpeg -lpng -lX11 -lboost_program_options

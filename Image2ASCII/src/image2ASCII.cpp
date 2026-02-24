@@ -52,12 +52,12 @@ CImg<unsigned char> averageResize(const CImg<unsigned char>& img, int outputWidt
 }
 
 // Resizes the image so that one pixel = one character. Has the bonus of performing the average operation for us
-CImg<unsigned char> resizeImage(CImg<unsigned char> image, int outputWidth) {
+CImg<unsigned char> resizeImage(CImg<unsigned char> image, int outputWidth, float charAspect) {
     int imgWidth = image.width();
     int imgHeight = image.height();
     float aspectRatio = (float)imgHeight / imgWidth;
 
-    int outputHeight = outputWidth * aspectRatio * CHAR_ASPECT;
+    int outputHeight = outputWidth * aspectRatio * charAspect;
 
     return averageResize(image, outputWidth, outputHeight);
 }
@@ -141,6 +141,7 @@ int main(int argc, char* argv[]) {
         ("characters,c", po::value<std::string>()->required(), "character set file")
         ("input,i", po::value<std::string>()->required(), "input file")
         ("width,w", po::value<int>()->default_value(60), "width of output in characters")
+        ("aspect,a", po::value<float>()->default_value(0.4f), "aspect ratio of height to width of characters")
         ("invert,v", "invert the image");
 
     po::positional_options_description p;
@@ -173,11 +174,13 @@ int main(int argc, char* argv[]) {
     string inputFile;
     string characterSetFile;
     int width;
+    float charAspect;
     bool invert = false;
 
     inputFile = vm["input"].as<string>();
     characterSetFile = vm["characters"].as<string>();
     width = vm["width"].as<int>();
+    charAspect = vm["aspect"].as<float>();
     if (width < 10 || width > 500) {
         cout << "Error: width must be between 10 and 500\n";
         return 1;
@@ -203,7 +206,7 @@ int main(int argc, char* argv[]) {
         image = 255 - image;
     }
 
-    CImg<unsigned char> resizedImage = resizeImage(image, width);
+    CImg<unsigned char> resizedImage = resizeImage(image, width, charAspect);
 
     map<int, string> mapping = mapCharacterDensity(characterSet, resizedImage, true);
 
